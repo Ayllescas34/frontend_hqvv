@@ -82,7 +82,8 @@ const ReservaForm = ({ onRegistro }) => {
       await axios.post('http://localhost:3002/api/reservas', {
         ...reservaData,
         totalPagado,
-        valorAnticipo
+        valorAnticipo,
+        habitaciones // <-- Enviar habitaciones seleccionadas
       });
       setFormData(initialForm);
       if (onRegistro) onRegistro();

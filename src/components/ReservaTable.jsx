@@ -12,7 +12,7 @@ const ReservaTable = () => {
   const [reservaHabitaciones, setReservaHabitaciones] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:3002/api/reservas').then(res => setReservas(res.data));
+    axios.get('http://localhost:3002/api/reservas/con-habitaciones').then(res => setReservas(res.data));
     axios.get('http://localhost:3002/api/huespedes').then(res => setHuespedes(res.data));
     axios.get('http://localhost:3002/api/habitaciones').then(res => setHabitaciones(res.data));
     axios.get('http://localhost:3002/api/reservas-habitaciones').then(res => setReservaHabitaciones(res.data));
@@ -23,14 +23,10 @@ const ReservaTable = () => {
     return h ? `${h.primer_nombre} ${h.primer_apellido}` : '';
   };
 
+  // Ya no se usa, pero puedes dejarlo si lo necesitas en otro lado
   const getHabitacionesReserva = (id_reserva) => {
-    // Asegura que id_reserva y id_habitacion sean numéricos para comparación
-    const rels = reservaHabitaciones.filter(rh => Number(rh.id_reserva) === Number(id_reserva));
-    const nombres = rels.map(rh => {
-      const hab = habitaciones.find(h => Number(h.id_habitacion) === Number(rh.id_habitacion));
-      return hab ? hab.nombre : '';
-    }).filter(Boolean);
-    return nombres.length ? nombres.join(', ') : 'Sin habitaciones asignadas';
+    const reserva = reservas.find(r => Number(r.id_reserva) === Number(id_reserva));
+    return reserva && reserva.habitaciones ? reserva.habitaciones : 'Sin habitaciones asignadas';
   };
 
   // Modal de previsualización PDF
@@ -46,11 +42,11 @@ const ReservaTable = () => {
 
   // Utilidad para formatear fecha/hora
   function formatDateTime(str) {
-  if (!str) return '';
-  const d = new Date(str);
-  if (isNaN(d)) return str;
-  const pad = n => String(n).padStart(2, '0');
-  return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    if (!str) return '';
+    const d = new Date(str);
+    if (isNaN(d)) return str;
+    const pad = n => String(n).padStart(2, '0');
+    return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
   }
 
   // Función para generar PDF y mostrar previsualización
@@ -98,7 +94,7 @@ const ReservaTable = () => {
     y += 14;
     // Datos distribuidos profesionalmente
     const huesped = huespedes.find(h => Number(h.id_huesped) === Number(reserva.id_huesped));
-    const habitacionesTxt = getHabitacionesReserva(reserva.id_reserva);
+    let habitacionesTxt = reserva.habitaciones || 'Sin habitaciones asignadas';
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(16);
     doc.setTextColor(57,107,87); // #396b57
@@ -124,10 +120,10 @@ const ReservaTable = () => {
     doc.text(`INGRESO: ${formatDateTime(reserva.fecha_ingreso)}`.toUpperCase(), 15, y); y += 8;
     doc.text(`SALIDA: ${formatDateTime(reserva.fecha_salida)}`.toUpperCase(), 15, y); y += 8;
     doc.text(`NOCHES: ${reserva.total_noches}`.toUpperCase(), 15, y); y += 8;
-    doc.text(`TOTAL PAGADO: ${reserva.totalPagado}`.toUpperCase(), 15, y); y += 8;
+    doc.text(`TOTAL PAGADO: Q. ${reserva.totalPagado}`.toUpperCase(), 15, y); y += 8;
     doc.text(`TIPO CONTACTO: ${reserva.tipo_contacto}`.toUpperCase(), 15, y); y += 8;
     doc.text(`TIPO PAGO: ${reserva.tipo_pago}`.toUpperCase(), 15, y); y += 8;
-    doc.text(`FACTURA: ${reserva.fecha_factura ? formatDateTime(reserva.fecha_factura) : ''}`.toUpperCase(), 15, y); y += 8;
+    doc.text(`FECHA DE FACTURA: ${reserva.fecha_factura ? formatDateTime(reserva.fecha_factura) : ''}`.toUpperCase(), 15, y); y += 8;
     doc.text(`N° FACTURA: ${reserva.numero_factura || ''}`.toUpperCase(), 15, y); y += 8;
     doc.text(`HABITACIONES: ${habitacionesTxt}`.toUpperCase(), 15, y); y += 12;
     doc.setDrawColor(180,180,180); doc.line(15, y, 195, y); y += 15;
@@ -217,6 +213,7 @@ const ReservaTable = () => {
             <th className="px-5 py-4 text-left text-sm font-semibold uppercase tracking-wide">Tipo Pago</th>
             <th className="px-5 py-4 text-left text-sm font-semibold uppercase tracking-wide">Feche de Factura</th>
             <th className="px-5 py-4 text-left text-sm font-semibold uppercase tracking-wide">N° Factura</th>
+            <th className="px-5 py-4 text-left text-sm font-semibold uppercase tracking-wide">Habitaciones</th>
             <th className="px-5 py-4 text-left text-sm font-semibold uppercase tracking-wide">PDF</th>
           </tr>
         </thead>
@@ -234,6 +231,7 @@ const ReservaTable = () => {
               <td className="px-5 py-3 whitespace-nowrap text-gray-700">{r.tipo_pago}</td>
               <td className="px-5 py-3 whitespace-nowrap text-gray-700">{formatDateTime(r.fecha_factura)}</td>
               <td className="px-5 py-3 whitespace-nowrap text-gray-700">{r.numero_factura}</td>
+              <td className="px-5 py-3 whitespace-nowrap text-gray-700">{r.habitaciones || 'Sin habitaciones asignadas'}</td>
               <td className="px-5 py-3 whitespace-nowrap text-gray-700">
                 <button onClick={() => previewReservaPDF(r)} className="bg-red-600 text-white px-2 py-1 rounded text-xs">PDF</button>
                 {Number(r.saldo_pendiente) > 0 && (
