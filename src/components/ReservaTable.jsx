@@ -46,11 +46,11 @@ const ReservaTable = () => {
 
   // Utilidad para formatear fecha/hora
   function formatDateTime(str) {
-    if (!str) return '';
-    const d = new Date(str);
-    if (isNaN(d)) return str;
-    const pad = n => String(n).padStart(2, '0');
-    return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  if (!str) return '';
+  const d = new Date(str);
+  if (isNaN(d)) return str;
+  const pad = n => String(n).padStart(2, '0');
+  return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
   }
 
   // Función para generar PDF y mostrar previsualización
@@ -178,6 +178,12 @@ const ReservaTable = () => {
 
   async function handleGuardarPagoComplemento() {
     if (!pagoComplemento || !fechaPagoComplemento) return;
+    const montoPago = Number(pagoComplemento);
+    const saldoPendiente = Number(reservaSeleccionada?.saldo_pendiente);
+    if (montoPago > saldoPendiente) {
+      alert('El monto del pago complemento no puede ser mayor al saldo pendiente.');
+      return;
+    }
     try {
       // Solo enviar pago_complemento y fecha_pago_complemento, backend calcula y retorna saldo_pendiente
       const response = await axios.put(`http://localhost:3002/api/reservas/${reservaSeleccionada.id_reserva}/pago-complemento`, {
@@ -219,18 +225,18 @@ const ReservaTable = () => {
             <tr key={r.id_reserva} className="hover:bg-blue-100">
               <td className="px-5 py-3 whitespace-nowrap font-bold text-green-700">{`HQV-${r.id_reserva}-${new Date(r.fechaReservacion || r.fecha_ingreso || Date.now()).getFullYear()}`}</td>
               <td className="px-6 py-3 whitespace-nowrap font-medium text-gray-900">{getHuespedNombre(r.id_huesped)}</td>
-              <td className="px-5 py-3 whitespace-nowrap text-gray-700">{r.fecha_ingreso}</td>
-              <td className="px-5 py-3 whitespace-nowrap text-gray-700">{r.fecha_salida}</td>
+              <td className="px-5 py-3 whitespace-nowrap text-gray-700">{formatDateTime(r.fecha_ingreso)}</td>
+              <td className="px-5 py-3 whitespace-nowrap text-gray-700">{formatDateTime(r.fecha_salida)}</td>
               <td className="px-4 py-3 whitespace-nowrap text-center font-semibold text-indigo-700">{r.total_noches}</td>
               <td className="px-5 py-3 whitespace-nowrap text-gray-700">{r.totalPagado}</td>
               <td className="px-5 py-3 whitespace-nowrap text-red-700 font-bold">{Number(r.saldo_pendiente).toFixed(2)}</td>
               <td className="px-5 py-3 whitespace-nowrap text-gray-700">{r.tipo_contacto}</td>
               <td className="px-5 py-3 whitespace-nowrap text-gray-700">{r.tipo_pago}</td>
-              <td className="px-5 py-3 whitespace-nowrap text-gray-700">{r.fecha_factura}</td>
+              <td className="px-5 py-3 whitespace-nowrap text-gray-700">{formatDateTime(r.fecha_factura)}</td>
               <td className="px-5 py-3 whitespace-nowrap text-gray-700">{r.numero_factura}</td>
               <td className="px-5 py-3 whitespace-nowrap text-gray-700">
                 <button onClick={() => previewReservaPDF(r)} className="bg-red-600 text-white px-2 py-1 rounded text-xs">PDF</button>
-                {(Number(r.totalPagado) - Number(r.valorAnticipo)) > 0 && (
+                {Number(r.saldo_pendiente) > 0 && (
                   <button onClick={() => openPagoModal(r)} className="ml-2 bg-green-700 text-white px-2 py-1 rounded text-xs">Agregar pago complemento</button>
                 )}
               </td>
@@ -262,6 +268,8 @@ const ReservaTable = () => {
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full relative">
             <h3 className="text-lg font-bold mb-2 text-green-700">Registrar Pago Complemento</h3>
             <div className="mb-4">
+              <label className="block text-gray-700 mb-1">Saldo pendiente actual</label>
+              <div className="font-bold text-red-700 mb-2 text-lg">{reservaSeleccionada ? Number(reservaSeleccionada.saldo_pendiente).toFixed(2) : '--'}</div>
               <label className="block text-gray-700 mb-1">Monto del pago</label>
               <input type="number" min="0" value={pagoComplemento} onChange={e => setPagoComplemento(e.target.value)} className="border border-gray-300 rounded px-3 py-2 w-full" />
             </div>
