@@ -1,0 +1,41 @@
+router.post('/', async (req, res) => {
+  const {
+    id_huesped,
+    fechaReservacion,
+    fechaAnticipo,
+    valorAnticipo,
+    fecha_ingreso,
+    fecha_salida,
+    fecha_factura,
+    numero_factura,
+    totalPagado,
+    tipo_contacto,
+    tipo_pago
+  } = req.body;
+
+  try {
+    const [result] = await db.query(
+      `INSERT INTO Reservas 
+      (id_huesped, fechaReservacion, fechaAnticipo, valorAnticipo, fecha_ingreso, fecha_salida, fecha_factura, numero_factura, totalPagado, tipo_contacto, tipo_pago) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id_huesped,
+        fechaReservacion,
+        fechaAnticipo,
+        valorAnticipo,
+        fecha_ingreso,
+        fecha_salida,
+        fecha_factura,
+        numero_factura,
+        totalPagado,
+        tipo_contacto,
+        tipo_pago
+      ]
+    );
+    // Consultar el saldo pendiente calculado por el trigger
+    const [row] = await db.query('SELECT saldo_pendiente FROM Reservas WHERE id_reserva = ?', [result.insertId]);
+    res.json({ id_reserva: result.insertId, saldo_pendiente: row[0].saldo_pendiente });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
