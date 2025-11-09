@@ -9,8 +9,8 @@ const initialForm = {
   valorAnticipo: '',
   fecha_ingreso: '',
   fecha_salida: '',
-  fecha_factura: '',
-  numero_factura: '',
+  //fecha_factura: '',
+  //numero_factura: '',
   totalPagado: '', // Cambiar a totalPagado para coincidir con backend
   tipo_contacto: 'booking',
   tipo_pago: 'efectivo',
@@ -83,7 +83,9 @@ const ReservaForm = ({ onRegistro }) => {
         ...reservaData,
         totalPagado,
         valorAnticipo,
-        habitaciones // <-- Enviar habitaciones seleccionadas
+        habitaciones,
+        fecha_factura: reservaData.fecha_factura ? reservaData.fecha_factura : null,
+        numero_factura: reservaData.numero_factura ? reservaData.numero_factura : null
       });
       setFormData(initialForm);
       if (onRegistro) onRegistro();

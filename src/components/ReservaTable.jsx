@@ -39,6 +39,8 @@ const ReservaTable = () => {
   const [pagoComplemento, setPagoComplemento] = useState('');
   const [fechaPagoComplemento, setFechaPagoComplemento] = useState('');
   const [reservaSeleccionada, setReservaSeleccionada] = useState(null);
+  const [fechaFactura, setFechaFactura] = useState('');
+const [numeroFactura, setNumeroFactura] = useState(''); 
 
   // Utilidad para formatear fecha/hora
   function formatDateTime(str) {
@@ -169,6 +171,8 @@ const ReservaTable = () => {
     setReservaSeleccionada(reserva);
     setPagoComplemento('');
     setFechaPagoComplemento('');
+    setFechaFactura(reserva.fecha_factura || '');
+    setNumeroFactura(reserva.numero_factura || '');
     setShowPagoModal(true);
   }
 
@@ -181,15 +185,16 @@ const ReservaTable = () => {
       return;
     }
     try {
-      // Solo enviar pago_complemento y fecha_pago_complemento, backend calcula y retorna saldo_pendiente
+      // Enviar también fecha_factura y numero_factura
       const response = await axios.put(`http://localhost:3002/api/reservas/${reservaSeleccionada.id_reserva}/pago-complemento`, {
         pago_complemento: pagoComplemento,
-        fecha_pago_complemento: fechaPagoComplemento
+        fecha_pago_complemento: fechaPagoComplemento,
+        fecha_factura: fechaFactura,
+        numero_factura: numeroFactura
       });
-      // Actualizar la reserva en la UI con saldo_pendiente del backend
       const nuevoSaldoPendiente = response.data.saldo_pendiente;
       setReservas(reservas => reservas.map(r => r.id_reserva === reservaSeleccionada.id_reserva
-        ? { ...r, pago_complemento: pagoComplemento, fecha_pago_complemento: fechaPagoComplemento, saldo_pendiente: nuevoSaldoPendiente }
+        ? { ...r, pago_complemento: pagoComplemento, fecha_pago_complemento: fechaPagoComplemento, saldo_pendiente: nuevoSaldoPendiente, fecha_factura: fechaFactura, numero_factura: numeroFactura }
         : r));
       setShowPagoModal(false);
     } catch (err) {
@@ -262,26 +267,34 @@ const ReservaTable = () => {
       )}
       {/* Modal para pago complemento */}
       {showPagoModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full relative">
-            <h3 className="text-lg font-bold mb-2 text-green-700">Registrar Pago Complemento</h3>
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-1">Saldo pendiente actual</label>
-              <div className="font-bold text-red-700 mb-2 text-lg">{reservaSeleccionada ? Number(reservaSeleccionada.saldo_pendiente).toFixed(2) : '--'}</div>
-              <label className="block text-gray-700 mb-1">Monto del pago</label>
-              <input type="number" min="0" value={pagoComplemento} onChange={e => setPagoComplemento(e.target.value)} className="border border-gray-300 rounded px-3 py-2 w-full" />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-1">Fecha del pago</label>
-              <input type="date" value={fechaPagoComplemento} onChange={e => setFechaPagoComplemento(e.target.value)} className="border border-gray-300 rounded px-3 py-2 w-full" />
-            </div>
-            <div className="flex justify-end gap-2">
-              <button onClick={handleGuardarPagoComplemento} className="bg-green-700 text-white px-4 py-2 rounded">Guardar</button>
-              <button onClick={() => setShowPagoModal(false)} className="bg-gray-400 text-white px-4 py-2 rounded">Cancelar</button>
-            </div>
+      <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full relative">
+          <h3 className="text-lg font-bold mb-2 text-green-700">Registrar Pago Complemento</h3>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-1">Saldo pendiente actual</label>
+            <div className="font-bold text-red-700 mb-2 text-lg">{reservaSeleccionada ? Number(reservaSeleccionada.saldo_pendiente).toFixed(2) : '--'}</div>
+            <label className="block text-gray-700 mb-1">Monto del pago</label>
+            <input type="number" min="0" value={pagoComplemento} onChange={e => setPagoComplemento(e.target.value)} className="border border-gray-300 rounded px-3 py-2 w-full" />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-1">Fecha del pago</label>
+            <input type="date" value={fechaPagoComplemento} onChange={e => setFechaPagoComplemento(e.target.value)} className="border border-gray-300 rounded px-3 py-2 w-full" />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-1">Fecha de factura</label>
+            <input type="date" value={fechaFactura} onChange={e => setFechaFactura(e.target.value)} className="border border-gray-300 rounded px-3 py-2 w-full" />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-1">Número de factura</label>
+            <input type="text" value={numeroFactura} onChange={e => setNumeroFactura(e.target.value)} className="border border-gray-300 rounded px-3 py-2 w-full" />
+          </div>
+          <div className="flex justify-end gap-2">
+            <button onClick={handleGuardarPagoComplemento} className="bg-green-700 text-white px-4 py-2 rounded">Guardar</button>
+            <button onClick={() => setShowPagoModal(false)} className="bg-gray-400 text-white px-4 py-2 rounded">Cancelar</button>
           </div>
         </div>
-      )}
+      </div>
+    )}  
     </div>
   );
 };
