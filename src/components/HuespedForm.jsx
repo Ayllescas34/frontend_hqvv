@@ -11,6 +11,7 @@ const initialForm = {
   apellido_casada: '',
   fecha_nacimiento: '',
   telefono: '',
+  email: '',
   ciudad: '',
   pais: '',
 };
@@ -31,6 +32,7 @@ const HuespedForm = ({ onRegistro, initialDni }) => {
       formData.primer_nombre.trim() !== '' &&
       formData.primer_apellido.trim() !== '' &&
       formData.telefono.trim() !== '' &&
+      formData.email.trim() !== '' &&
       formData.ciudad.trim() !== '' &&
       formData.pais.trim() !== ''
     );
@@ -100,6 +102,10 @@ const HuespedForm = ({ onRegistro, initialDni }) => {
             <input className={inputStyle} value={formData.telefono} onChange={e => setFormData({ ...formData, telefono: e.target.value })} />
           </div>
           <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Email *</label>
+            <input className={inputStyle} value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+          </div>
+          <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Ciudad *</label>
             <input className={inputStyle} value={formData.ciudad} onChange={e => setFormData({ ...formData, ciudad: e.target.value })} />
           </div>
@@ -128,6 +134,7 @@ const HuespedForm = ({ onRegistro, initialDni }) => {
               {formData.apellido_casada && <p><strong>Apellido Casada:</strong> {formData.apellido_casada}</p>}
               <p><strong>Fecha Nacimiento:</strong> {formData.fecha_nacimiento}</p>
               <p><strong>Teléfono:</strong> {formData.telefono}</p>
+              <p><strong>Email:</strong> {formData.email}</p>
               <p><strong>Ciudad:</strong> {formData.ciudad}</p>
               <p><strong>País:</strong> {formData.pais}</p>
             </div>

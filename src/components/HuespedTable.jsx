@@ -18,9 +18,9 @@ const HuespedTable = () => {
             <th className="px-4 py-4 text-left text-sm font-semibold uppercase tracking-wide">NIT</th>
             <th className="px-5 py-4 text-left text-sm font-semibold uppercase tracking-wide">Nacimiento</th>
             <th className="px-5 py-4 text-left text-sm font-semibold uppercase tracking-wide">Teléfono</th>
+            <th className="px-5 py-4 text-left text-sm font-semibold uppercase tracking-wide">Email</th>
             <th className="px-5 py-4 text-left text-sm font-semibold uppercase tracking-wide">Ciudad</th>
             <th className="px-5 py-4 text-left text-sm font-semibold uppercase tracking-wide">País</th>
-            <th className="px-5 py-4 text-left text-sm font-semibold uppercase tracking-wide">Apellido de Casada</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -38,9 +38,9 @@ const HuespedTable = () => {
               <td className="px-4 py-3 whitespace-nowrap text-gray-700">{h.nit}</td>
               <td className="px-5 py-3 whitespace-nowrap text-gray-700">{h.fecha_nacimiento}</td>
               <td className="px-5 py-3 whitespace-nowrap text-gray-700">{h.telefono}</td>
+              <td className="px-5 py-3 whitespace-nowrap text-gray-700">{h.email}</td>
               <td className="px-5 py-3 whitespace-nowrap text-gray-700">{h.ciudad}</td>
               <td className="px-5 py-3 whitespace-nowrap text-gray-700">{h.pais}</td>
-              <td className="px-5 py-3 whitespace-nowrap text-gray-700">{h.apellido_casada}</td>
             </tr>
           ))}
         </tbody>
